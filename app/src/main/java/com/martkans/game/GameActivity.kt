@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -13,6 +14,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -24,7 +26,7 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
 
     companion object {
         private const val SPEED_RATIO = 5
-        private const val LX_TRESHOLD = 10
+        private const val LX_TRESHOLD = 5
     }
 
     private var currentY = 0f
@@ -32,20 +34,16 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private lateinit var animationNyanCat: SpringAnimation
     private lateinit var popupWindow: PopupWindow
+    private lateinit var mediaPlayer: MediaPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_game)
         supportActionBar?.hide()
-
-        val display = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(display)
-        val density = resources.displayMetrics.density
-        heightScreen = display.heightPixels / density
-
-
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        getInfoAboutWindow()
 
         registerSensors()
 
@@ -53,6 +51,21 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
             findViewById<View>(R.id.catIV),
             DynamicAnimation.TRANSLATION_Y, currentY
         )
+
+        playTerribleMusic()
+    }
+
+    private fun getInfoAboutWindow() {
+        val display = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(display)
+        val density = resources.displayMetrics.density
+        heightScreen = display.heightPixels / density
+    }
+
+    private fun playTerribleMusic() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.nyan_cat_sound)
+        mediaPlayer.isLooping = true
+        mediaPlayer.start()
     }
 
     private fun registerSensors() {
@@ -129,12 +142,15 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
         val resumeBtn = popupView.findViewById<Button>(R.id.resumeBTN)
         val menuBtn = popupView.findViewById<Button>(R.id.menuBTN)
 
+        popupView.findViewById<TextView>(R.id.pointsPauseTV).text = pointsTV.text
+
         resumeBtn.setOnClickListener {
             registerSensors()
             popupWindow.dismiss()
         }
 
         menuBtn.setOnClickListener {
+            mediaPlayer.stop()
             super.onBackPressed()
         }
 
