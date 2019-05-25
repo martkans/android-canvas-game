@@ -12,14 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import kotlinx.android.synthetic.main.activity_fullscreen.*
+import kotlinx.android.synthetic.main.activity_game.*
 
 
-class FullscreenActivity : AppCompatActivity(), SensorEventListener {
+class GameActivity : AppCompatActivity(), SensorEventListener {
 
     companion object {
         private const val SPEED_RATIO = 5
-        private const val LX_TRESHOLD = 50
+        private const val LX_TRESHOLD = 10
     }
 
     private var currentY = 0f
@@ -30,7 +30,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_fullscreen)
+        setContentView(R.layout.activity_game)
         supportActionBar?.hide()
 
         val display = DisplayMetrics()
@@ -43,7 +43,10 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
         registerSensors()
 
-        animationNyanCat = SpringAnimation(findViewById<View>(R.id.catIV), DynamicAnimation.TRANSLATION_Y, currentY)
+        animationNyanCat = SpringAnimation(
+            findViewById<View>(R.id.catIV),
+            DynamicAnimation.TRANSLATION_Y, currentY
+        )
 
     }
 

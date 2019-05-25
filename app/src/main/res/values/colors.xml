@@ -5,4 +5,6 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="black_overlay">#66000000</color>
+    <color name="gm_menu_font_color">#0C0060</color>
+    <color name="gm_bg_button_color">#5844E0</color>
 </resources>
