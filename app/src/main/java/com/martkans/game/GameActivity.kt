@@ -7,7 +7,12 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -26,6 +31,7 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
     private var heightScreen = 0f
     private lateinit var sensorManager: SensorManager
     private lateinit var animationNyanCat: SpringAnimation
+    private lateinit var popupWindow: PopupWindow
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +53,6 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
             findViewById<View>(R.id.catIV),
             DynamicAnimation.TRANSLATION_Y, currentY
         )
-
     }
 
     private fun registerSensors() {
@@ -103,5 +108,36 @@ class GameActivity : AppCompatActivity(), SensorEventListener {
                 moveNyanCat()
             }
         }
+    }
+
+    override fun onBackPressed() {
+        handlePausePopup()
+    }
+
+
+    private fun handlePausePopup() {
+        sensorManager.unregisterListener(this)
+
+        val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val popupView = inflater.inflate(R.layout.popup_pause, null)
+
+        val width = LinearLayout.LayoutParams.WRAP_CONTENT
+        val height = LinearLayout.LayoutParams.WRAP_CONTENT
+
+        popupWindow = PopupWindow(popupView, width, height, true)
+
+        val resumeBtn = popupView.findViewById<Button>(R.id.resumeBTN)
+        val menuBtn = popupView.findViewById<Button>(R.id.menuBTN)
+
+        resumeBtn.setOnClickListener {
+            registerSensors()
+            popupWindow.dismiss()
+        }
+
+        menuBtn.setOnClickListener {
+            super.onBackPressed()
+        }
+
+        popupWindow.showAtLocation(findViewById(R.id.mainCL), Gravity.CENTER, 0, 0)
     }
 }
