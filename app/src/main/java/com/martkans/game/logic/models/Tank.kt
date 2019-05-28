@@ -3,25 +3,22 @@ package com.martkans.game.logic.models
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.RectF
 import com.martkans.game.R
-import kotlin.random.Random
 
-class Tank(context: Context, screenX: Int, screenY: Int) {
+class Tank(context: Context, screenX: Int, screenY: Int) : Element(screenX, screenY) {
 
-    var bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.tank)
+    override var bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.tank)
+    override var collisionArea: RectF =
+        RectF(x - 10f, y - 10f, bitmap.width.toFloat() - 10f, bitmap.height.toFloat() - 10f)
 
-    var maxX: Float = screenX.toFloat()
-    var maxY: Float = screenY.toFloat()
+    override fun update(playerSpeed: Float) {
 
-    var x: Float = Random.nextInt(maxX.toInt()).toFloat()
-    var y: Float = Random.nextInt(maxY.toInt()).toFloat()
-    var speed: Float = Random.nextInt(10).toFloat() + 5f
+        super.update(playerSpeed)
 
-    fun update(playerSpeed: Float) {
-        x -= playerSpeed + speed
-        if (x < -bitmap.width) {
-            x = maxX
-            y = Random.nextInt(maxY.toInt()).toFloat()
-        }
+        collisionArea.left = x - 10f
+        collisionArea.top = y - 10f
+        collisionArea.right = x + bitmap.width - 10f
+        collisionArea.bottom = y + bitmap.height - 10f
     }
 }

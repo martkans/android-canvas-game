@@ -10,15 +10,15 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import com.martkans.game.logic.models.Coin
+import com.martkans.game.logic.models.Element
 import com.martkans.game.logic.models.NyanCat
-import com.martkans.game.logic.models.Star
-import com.martkans.game.logic.models.Tank
 import com.martkans.game.logic.repositories.GameRepository
 
 
-class GameView(contextGame: Context, private var sensorManager: SensorManager, screenX: Int, screenY: Int) :
-    SurfaceView(contextGame), Runnable, SensorEventListener {
+class GameView(
+    private val contextGame: Context, private var sensorManager: SensorManager, private val screenX: Int,
+    private val screenY: Int
+) : SurfaceView(contextGame), Runnable, SensorEventListener {
 
     companion object {
         private const val LX_TRESHOLD = 5
@@ -26,7 +26,9 @@ class GameView(contextGame: Context, private var sensorManager: SensorManager, s
     }
 
     @Volatile
-    private var playing: Boolean = false
+    private var playing: Boolean = true
+    private var gameOver: Boolean = false
+
     private lateinit var gameThread: Thread
 
     private var nyanCat: NyanCat = NyanCat(contextGame, screenX, screenY)
@@ -40,15 +42,19 @@ class GameView(contextGame: Context, private var sensorManager: SensorManager, s
     private var currentXModifier: Float = 0f
     private var currentYModifier: Float = 0f
 
-    private var stars: ArrayList<Star> = GameRepository.createStars(
-        contextGame, screenX, screenY
-    )
-    private var enemies: ArrayList<Tank> = GameRepository.createEnemies(
-        contextGame, screenX, screenY
-    )
-    private var coins: ArrayList<Coin> = GameRepository.createCoins(
-        contextGame, screenX, screenY
-    )
+    private var points: Int = 0
+    private var lives: Int = 3
+
+    init {
+
+        GameRepository.createCoins(contextGame, screenX, screenY)
+        GameRepository.createEnemies(contextGame, screenX, screenY)
+        GameRepository.createStars(contextGame, screenX, screenY)
+
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.FILL
+        paint.textAlign = Paint.Align.CENTER
+    }
 
     override fun run() {
         while (playing) {
@@ -59,11 +65,23 @@ class GameView(contextGame: Context, private var sensorManager: SensorManager, s
     }
 
     private fun update() {
-        GameRepository.updateAllStars(currentXModifier)
-        GameRepository.updateAllEnemies(currentXModifier)
-        GameRepository.updateAllCoins(currentXModifier)
-
         nyanCat.update(currentXModifier * SPEED_RATIO, currentYModifier * SPEED_RATIO)
+
+        GameRepository.updateAllStars(currentXModifier)
+
+        if (GameRepository.updateAllCoins(currentXModifier, nyanCat.collisionArea))
+            points++
+
+        if (GameRepository.updateAllEnemies(currentXModifier, nyanCat.collisionArea))
+            lives--
+
+        if (lives == 0) {
+            gameOver = true
+            playing = false
+
+            sensorManager.unregisterListener(this)
+        }
+
     }
 
     private fun draw() {
@@ -73,43 +91,42 @@ class GameView(contextGame: Context, private var sensorManager: SensorManager, s
 
             setBackground()
 
-            for (e in stars) {
-                canvas.drawBitmap(
-                    e.bitmap,
-                    e.x,
-                    e.y,
-                    paint
-                )
+            drawElements(GameRepository.stars)
+            drawElements(GameRepository.enemies)
+            drawElements(GameRepository.coins)
+
+            drawInfoAboutScoreAndLives()
+
+            canvas.drawBitmap(nyanCat.bitmap, nyanCat.x, nyanCat.y, paint)
+
+            if (gameOver) {
+                drawGameOverMessage()
             }
-
-            for (e in enemies) {
-                canvas.drawBitmap(
-                    e.bitmap,
-                    e.x,
-                    e.y,
-                    paint
-                )
-            }
-
-            for (e in coins) {
-                canvas.drawBitmap(
-                    e.bitmap,
-                    e.x,
-                    e.y,
-                    paint
-                )
-            }
-
-
-            canvas.drawBitmap(
-                nyanCat.getBitmap(),
-                nyanCat.getX(),
-                nyanCat.getY(),
-                paint
-            )
 
             surfaceHolder.unlockCanvasAndPost(canvas)
         }
+    }
+
+    private fun drawElements(elements: ArrayList<Element>) {
+        for (e in elements)
+            canvas.drawBitmap(e.bitmap, e.x, e.y, paint)
+    }
+
+    private fun drawInfoAboutScoreAndLives() {
+
+        paint.textSize = 50f
+        canvas.drawText("Lives: $lives", 100f, 50f, paint)
+        canvas.drawText("Points: $points", canvas.width - 150f, 50f, paint)
+    }
+
+    private fun drawGameOverMessage() {
+        val yCenter = ((canvas.height / 2) - ((paint.descent() + paint.ascent()) / 2))
+
+        paint.textSize = 100f
+        canvas.drawText("Your points: $points", canvas.width / 2f, yCenter, paint)
+
+        paint.textSize = 75f
+        canvas.drawText("Tap to play again", canvas.width / 2f, yCenter + 125f, paint)
     }
 
     private fun control() {
@@ -173,5 +190,26 @@ class GameView(contextGame: Context, private var sensorManager: SensorManager, s
         }
     }
 
+    fun initGame() {
+
+        if (gameOver) {
+            currentXModifier = 0f
+            currentYModifier = 0f
+
+            nyanCat.moveNyanCatToStartPosition()
+
+            GameRepository.createCoins(contextGame, screenX, screenY)
+            GameRepository.createEnemies(contextGame, screenX, screenY)
+            GameRepository.createStars(contextGame, screenX, screenY)
+
+            gameOver = false
+
+            points = 0
+            lives = 3
+
+            resume()
+        }
+
+    }
 
 }

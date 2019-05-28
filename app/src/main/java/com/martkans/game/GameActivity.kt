@@ -26,6 +26,10 @@ class GameActivity : AppCompatActivity() {
 
         playTerribleMusic()
 
+        gameView!!.setOnClickListener {
+            gameView!!.initGame()
+        }
+
         setContentView(gameView)
     }
 
