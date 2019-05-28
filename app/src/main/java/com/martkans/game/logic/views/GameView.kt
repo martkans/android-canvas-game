@@ -10,10 +10,15 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import com.martkans.game.logic.models.Coin
 import com.martkans.game.logic.models.NyanCat
+import com.martkans.game.logic.models.Star
+import com.martkans.game.logic.models.Tank
+import com.martkans.game.logic.repositories.GameRepository
 
-class GameView(context: Context, private var sensorManager: SensorManager, screenX: Int, screenY: Int) :
-    SurfaceView(context), Runnable, SensorEventListener {
+
+class GameView(contextGame: Context, private var sensorManager: SensorManager, screenX: Int, screenY: Int) :
+    SurfaceView(contextGame), Runnable, SensorEventListener {
 
     companion object {
         private const val LX_TRESHOLD = 5
@@ -24,7 +29,7 @@ class GameView(context: Context, private var sensorManager: SensorManager, scree
     private var playing: Boolean = false
     private lateinit var gameThread: Thread
 
-    private var nyanCat: NyanCat = NyanCat(context, screenX, screenY)
+    private var nyanCat: NyanCat = NyanCat(contextGame, screenX, screenY)
 
     private var paint: Paint = Paint()
     private lateinit var canvas: Canvas
@@ -35,6 +40,16 @@ class GameView(context: Context, private var sensorManager: SensorManager, scree
     private var currentXModifier: Float = 0f
     private var currentYModifier: Float = 0f
 
+    private var stars: ArrayList<Star> = GameRepository.createStars(
+        contextGame, screenX, screenY
+    )
+    private var enemies: ArrayList<Tank> = GameRepository.createEnemies(
+        contextGame, screenX, screenY
+    )
+    private var coins: ArrayList<Coin> = GameRepository.createCoins(
+        contextGame, screenX, screenY
+    )
+
     override fun run() {
         while (playing) {
             update()
@@ -44,6 +59,10 @@ class GameView(context: Context, private var sensorManager: SensorManager, scree
     }
 
     private fun update() {
+        GameRepository.updateAllStars(currentXModifier)
+        GameRepository.updateAllEnemies(currentXModifier)
+        GameRepository.updateAllCoins(currentXModifier)
+
         nyanCat.update(currentXModifier * SPEED_RATIO, currentYModifier * SPEED_RATIO)
     }
 
@@ -53,6 +72,34 @@ class GameView(context: Context, private var sensorManager: SensorManager, scree
             canvas = surfaceHolder.lockCanvas()
 
             setBackground()
+
+            for (e in stars) {
+                canvas.drawBitmap(
+                    e.bitmap,
+                    e.x,
+                    e.y,
+                    paint
+                )
+            }
+
+            for (e in enemies) {
+                canvas.drawBitmap(
+                    e.bitmap,
+                    e.x,
+                    e.y,
+                    paint
+                )
+            }
+
+            for (e in coins) {
+                canvas.drawBitmap(
+                    e.bitmap,
+                    e.x,
+                    e.y,
+                    paint
+                )
+            }
+
 
             canvas.drawBitmap(
                 nyanCat.getBitmap(),
@@ -115,10 +162,11 @@ class GameView(context: Context, private var sensorManager: SensorManager, scree
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onSensorChanged(event: SensorEvent?) {
+
         if (event != null) {
-            if (event.sensor.type == Sensor.TYPE_LIGHT)
+            if (event.sensor.type == Sensor.TYPE_LIGHT) {
                 currentLX = event.values[0]
-            else {
+            } else {
                 currentXModifier = event.values[1]
                 currentYModifier = event.values[0]
             }

@@ -21,7 +21,7 @@ class NyanCat(context: Context, screenX: Int, screenY: Int) {
 
     fun update(distanceX: Float, distanceY: Float) {
 
-        x += distanceX
+        x += distanceX + 1
 
         if (x < minX)
             x = minX
