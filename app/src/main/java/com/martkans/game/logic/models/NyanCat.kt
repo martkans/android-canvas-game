@@ -9,9 +9,14 @@ import com.martkans.game.R
 
 class NyanCat(context: Context, screenX: Int, screenY: Int) {
 
+    companion object {
+        private const val START_X = 75f
+        private const val MIN_SPEED = 2
+    }
+
     var bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.nyan_cat_small)
 
-    var x: Float = 75f
+    var x: Float = START_X
     var y: Float = (screenY / 2).toFloat()
 
     private val maxY: Float = (screenY - this.bitmap.height).toFloat()
@@ -23,7 +28,7 @@ class NyanCat(context: Context, screenX: Int, screenY: Int) {
 
     fun update(distanceX: Float, distanceY: Float) {
 
-        x += distanceX + 1
+        x += distanceX + MIN_SPEED
 
         if (x < minX)
             x = minX
@@ -45,7 +50,7 @@ class NyanCat(context: Context, screenX: Int, screenY: Int) {
     }
 
     fun moveNyanCatToStartPosition() {
-        x = 75f
+        x = START_X
         y = (maxY + bitmap.width) / 2
     }
 }

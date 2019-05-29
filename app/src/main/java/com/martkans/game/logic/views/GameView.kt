@@ -10,6 +10,8 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import androidx.core.content.ContextCompat
+import com.martkans.game.R
 import com.martkans.game.logic.models.Element
 import com.martkans.game.logic.models.NyanCat
 import com.martkans.game.logic.repositories.GameRepository
@@ -23,6 +25,14 @@ class GameView(
     companion object {
         private const val LX_TRESHOLD = 5
         private const val SPEED_RATIO = 5
+        private const val STARTING_LX = 10f
+        private const val STARTING_NUMBER_OF_LIVES = 3
+
+        private const val SCORE_AND_LIVES_TEXT_SIZE = 50f
+        private const val GAME_OVER_TEXT_SIZE = 100f
+        private const val PLAY_AGAIN_TEXT_SIZE = 100f
+
+        private const val THREAD_SLEEP_TIME = 10L
     }
 
     @Volatile
@@ -37,13 +47,13 @@ class GameView(
     private lateinit var canvas: Canvas
     private var surfaceHolder: SurfaceHolder = holder
 
-    private var currentLX: Float = 10f
+    private var currentLX: Float = STARTING_LX
 
     private var currentXModifier: Float = 0f
     private var currentYModifier: Float = 0f
 
     private var points: Int = 0
-    private var lives: Int = 3
+    private var lives: Int = STARTING_NUMBER_OF_LIVES
 
     init {
 
@@ -107,6 +117,13 @@ class GameView(
         }
     }
 
+    private fun setBackground() {
+        if (currentLX < LX_TRESHOLD)
+            canvas.drawColor(ContextCompat.getColor(contextGame, R.color.gm_night_canvas))
+        else
+            canvas.drawColor(ContextCompat.getColor(contextGame, R.color.gm_day_canvas))
+    }
+
     private fun drawElements(elements: ArrayList<Element>) {
         for (e in elements)
             canvas.drawBitmap(e.bitmap, e.x, e.y, paint)
@@ -114,27 +131,56 @@ class GameView(
 
     private fun drawInfoAboutScoreAndLives() {
 
-        paint.textSize = 50f
-        canvas.drawText("Lives: $lives", 100f, 50f, paint)
-        canvas.drawText("Points: $points", canvas.width - 150f, 50f, paint)
+        paint.textSize = SCORE_AND_LIVES_TEXT_SIZE
+
+        val livesText = context.getString(R.string.gm_lives_num) + lives
+        val pointsText = context.getString(R.string.gm_points_num) + points
+
+        canvas.drawText(livesText, 100f, 50f, paint)
+        canvas.drawText(pointsText, canvas.width - 150f, 50f, paint)
     }
 
     private fun drawGameOverMessage() {
-        val yCenter = ((canvas.height / 2) - ((paint.descent() + paint.ascent()) / 2))
+        val yCenter = (canvas.height / 2) - ((paint.descent() + paint.ascent()) / 2)
 
-        paint.textSize = 100f
-        canvas.drawText("Your points: $points", canvas.width / 2f, yCenter, paint)
+        paint.textSize = GAME_OVER_TEXT_SIZE
 
-        paint.textSize = 75f
-        canvas.drawText("Tap to play again", canvas.width / 2f, yCenter + 125f, paint)
+        val pointsText = context.getString(R.string.gm_points_game_over) + points
+
+        canvas.drawText(pointsText, canvas.width / 2f, yCenter, paint)
+
+        paint.textSize = PLAY_AGAIN_TEXT_SIZE
+        canvas.drawText(context.getString(R.string.gm_play_again), canvas.width / 2f, yCenter + 125f, paint)
     }
 
     private fun control() {
         try {
-            Thread.sleep(10)
+            Thread.sleep(THREAD_SLEEP_TIME)
         } catch (e: InterruptedException) {
             e.printStackTrace()
         }
+    }
+
+    fun initGame() {
+
+        if (gameOver) {
+            currentXModifier = 0f
+            currentYModifier = 0f
+
+            nyanCat.moveNyanCatToStartPosition()
+
+            GameRepository.createCoins(contextGame, screenX, screenY)
+            GameRepository.createEnemies(contextGame, screenX, screenY)
+            GameRepository.createStars(contextGame, screenX, screenY)
+
+            gameOver = false
+
+            points = 0
+            lives = STARTING_NUMBER_OF_LIVES
+
+            resume()
+        }
+
     }
 
     fun pause() {
@@ -169,12 +215,6 @@ class GameView(
         )
     }
 
-    private fun setBackground() {
-        if (currentLX < LX_TRESHOLD)
-            canvas.drawColor(Color.BLACK)
-        else
-            canvas.drawColor(Color.BLUE)
-    }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
@@ -190,26 +230,6 @@ class GameView(
         }
     }
 
-    fun initGame() {
 
-        if (gameOver) {
-            currentXModifier = 0f
-            currentYModifier = 0f
-
-            nyanCat.moveNyanCatToStartPosition()
-
-            GameRepository.createCoins(contextGame, screenX, screenY)
-            GameRepository.createEnemies(contextGame, screenX, screenY)
-            GameRepository.createStars(contextGame, screenX, screenY)
-
-            gameOver = false
-
-            points = 0
-            lives = 3
-
-            resume()
-        }
-
-    }
 
 }

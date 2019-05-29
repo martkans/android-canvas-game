@@ -9,23 +9,27 @@
                                                    tools:ignore="MissingDefaultResource">
 
     <Button
-            android:text="START GAME"
+            android:text="@string/gm_start_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/startBTN" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="@dimen/gm_side_margin_btn"
+            android:layout_marginStart="@dimen/gm_side_margin_btn"
+            android:layout_marginBottom="@dimen/gm_bottom_margin_btn" app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_bias="0.4"
-            android:textStyle="bold" android:textSize="18sp" android:background="@drawable/rounded_btn"
-            android:layout_marginTop="8dp" android:textColor="@color/gm_menu_font_color" android:padding="16dp"/>
+            android:textStyle="bold" android:textSize="@dimen/gm_txt_size_btn"
+            android:background="@drawable/rounded_btn"
+            android:layout_marginTop="@dimen/gm_top_margin_btn" android:textColor="@color/gm_menu_font_color"
+            android:padding="@dimen/gm_padding_btn"/>
     <Button
-            android:text="EXIT"
+            android:text="@string/gm_exit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/exitBTN"
             app:layout_constraintTop_toBottomOf="@+id/startBTN" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" android:layout_marginTop="16dp"
-            android:background="@drawable/rounded_btn" android:textSize="18sp" android:textStyle="bold"
-            android:textColor="@color/gm_menu_font_color" android:padding="16dp"/>
+            android:layout_marginEnd="@dimen/gm_side_margin_btn" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="@dimen/gm_side_margin_btn" android:layout_marginTop="@dimen/gm_top_margin_btn"
+            android:background="@drawable/rounded_btn" android:textSize="@dimen/gm_txt_size_btn"
+            android:textStyle="bold"
+            android:textColor="@color/gm_menu_font_color" android:padding="@dimen/gm_padding_btn"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

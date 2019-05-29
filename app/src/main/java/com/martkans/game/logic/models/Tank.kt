@@ -8,17 +8,25 @@ import com.martkans.game.R
 
 class Tank(context: Context, screenX: Int, screenY: Int) : Element(screenX, screenY) {
 
+    companion object {
+        private const val COLLISION_AREA_MODIFIER = 10F
+    }
+
     override var bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.tank)
-    override var collisionArea: RectF =
-        RectF(x - 10f, y - 10f, bitmap.width.toFloat() - 10f, bitmap.height.toFloat() - 10f)
+    override var collisionArea: RectF = RectF(
+        x - COLLISION_AREA_MODIFIER,
+        y - COLLISION_AREA_MODIFIER,
+        bitmap.width.toFloat() - COLLISION_AREA_MODIFIER,
+        bitmap.height.toFloat() - COLLISION_AREA_MODIFIER
+    )
 
     override fun update(playerSpeed: Float) {
 
         super.update(playerSpeed)
 
-        collisionArea.left = x - 10f
-        collisionArea.top = y - 10f
-        collisionArea.right = x + bitmap.width - 10f
-        collisionArea.bottom = y + bitmap.height - 10f
+        collisionArea.left = x - COLLISION_AREA_MODIFIER
+        collisionArea.top = y - COLLISION_AREA_MODIFIER
+        collisionArea.right = x + bitmap.width - COLLISION_AREA_MODIFIER
+        collisionArea.bottom = y + bitmap.height - COLLISION_AREA_MODIFIER
     }
 }
