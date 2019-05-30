@@ -9,7 +9,7 @@ import com.martkans.game.R
 class Tank(context: Context, screenX: Int, screenY: Int) : Element(screenX, screenY) {
 
     companion object {
-        private const val COLLISION_AREA_MODIFIER = 10F
+        private const val COLLISION_AREA_MODIFIER = 30f
     }
 
     override var bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.tank)
